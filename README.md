@@ -1,4 +1,4 @@
-# ulauncher-chrome-profiles
+# ulauncher-firefox-profiles
 
 > [Ulauncher](https://ulauncher.io) extension for launching Firefox using a chosen user profile.
 
