@@ -1,10 +1,6 @@
 # ulauncher-chrome-profiles
 
-> [Ulauncher](https://ulauncher.io) extension for launching Google Chrome using a chosen user profile.
-
-## Screenshot
-
-![screenshot](screenshot.png)
+> [Ulauncher](https://ulauncher.io) extension for launching Firefox using a chosen user profile.
 
 ## Requirements
 
@@ -16,7 +12,7 @@
 Open ulauncher preferences window -> extensions -> add extension and paste the following url:
 
 ```
-https://github.com/floydjohn/ulauncher-chrome-profiles
+https://github.com/andresatierd/ulauncher-firefox-profiles
 ```
 
 ## Contributing
@@ -29,9 +25,9 @@ https://github.com/floydjohn/ulauncher-chrome-profiles
 
 ## Authors
 
-- [Alessandro Racheli](https://github.com/floydjohn)
-- README.md copied from [Bruno Paz](https://github.com/brpaz)
+- Original author [Alessandro Racheli](https://github.com/floydjohn)
+- Modified by [Andre Freitas](https://github.com/andresatierf)
 
 ## License
 
-MIT &copy; [Alessandro Racheli]
+MIT &copy; [Andre Freitas]
