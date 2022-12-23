@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import configparser
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
@@ -9,72 +10,104 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 
 
-def scan_chrome_folder(chrome_config_folder):
-    profiles = {}
-    # First, let's extract profiles from Local State JSON
-    with open(os.path.join(chrome_config_folder, 'Local State')) as f:
-        local_state = json.load(f)
-        cache = local_state['profile']['info_cache']
-        for folder, profile_data in cache.items():
-            profiles[folder] = {
-                'name': profile_data['name'],
-                'email': profile_data['user_name']
-            }
-
-    # Leave out every past profile which doesn't exist anymore
-    for folder in list(profiles.keys()):
-        try:
-            os.listdir(os.path.join(chrome_config_folder, folder))
-        except:
-            profiles.pop(folder)
-
-    return profiles
+def readConfig(firefox_config_folder):
+    config = configparser.ConfigParser(allow_no_value=True)
+    config.read(os.path.join(firefox_config_folder, "profiles.ini"))
+    return config
 
 
-class DemoExtension(Extension):
+def scan_firefox_folder(firefox_config_folder):
+    profiles = []
+
+    config = readConfig(firefox_config_folder)
+
+    profile_list = list(
+        filter(lambda section: "profile" in section.lower(), config.sections())
+    )
+
+    profile_list.sort(),
+    return list(
+        filter(
+            lambda profile: "release" not in profile["name"],
+            map(
+                lambda profile: {
+                    "name": config[profile]["Name"],
+                    "description": profile,
+                },
+                profile_list,
+            ),
+        )
+    )
+
+
+class FirefoxProfilesExtension(Extension):
     def __init__(self):
-        super(DemoExtension, self).__init__()
+        super(FirefoxProfilesExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
 
 
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
-        chrome_config_folder = os.path.expanduser(extension.preferences['chrome_folder'])
-        profiles = scan_chrome_folder(chrome_config_folder)
+        firefox_config_folder = os.path.expanduser(
+            extension.preferences["firefox_folder"]
+        )
+        profiles = scan_firefox_folder(firefox_config_folder)
 
         # Filter by query if inserted
         query = event.get_argument()
         if query:
             query = query.strip().lower()
-            for folder in list(profiles.keys()):
-                name = profiles[folder]['name'].lower()
+            for profile in profiles:
+                name = profile["name"].lower()
                 if query not in name:
-                    profiles.pop(folder)
+                    profiles.remove(profile)
 
         # Create launcher entries
         entries = []
-        for folder in profiles:
-            entries.append(ExtensionResultItem(
-                icon='images/icon.png',
-                name=profiles[folder]['name'],
-                description=profiles[folder]['email'],
-                on_enter=ExtensionCustomAction({
-                    'chrome_cmd': extension.preferences['chrome_cmd'],
-                    'opt': ['--profile-directory={0}'.format(folder)]
-                }, keep_app_open=True)
-            ))
+        for profile in profiles:
+            entries.append(
+                ExtensionResultItem(
+                    icon="images/icon.png",
+                    name=profile["name"],
+                    description=profile["description"],
+                    on_enter=ExtensionCustomAction(
+                        {
+                            "firefox_cmd": extension.preferences["firefox_cmd"],
+                            "opt": ["-P", profile["name"]],
+                        },
+                        keep_app_open=False,
+                    ),
+                )
+            )
+        entries.append(
+            ExtensionResultItem(
+                icon="images/incognito.png",
+                name="Incognito",
+                description="Launch browser in a private window",
+                on_enter=ExtensionCustomAction(
+                    {
+                        "firefox_cmd": extension.preferences["firefox_cmd"],
+                        "opt": ["--private-window"],
+                    },
+                    keep_app_open=False,
+                ),
+            )
+        )
         return RenderResultListAction(entries)
 
 
 class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
-        # Open Chrome when user selects an entry
+        # Open Firefox when user selects an entry
         data = event.get_data()
-        chrome_path = data['chrome_cmd']
-        opt = data['opt']
-        subprocess.Popen([chrome_path] + opt)
+        firefox_path = data["firefox_cmd"]
+        opt = data["opt"]
+        command = []
+        command.append(firefox_path)
+        command.extend(opt)
+        subprocess.Popen(command)
 
 
-if __name__ == '__main__':
-    DemoExtension().run()
+if __name__ == "__main__":
+    FirefoxProfilesExtension().run()
