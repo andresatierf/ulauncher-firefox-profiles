@@ -12,7 +12,7 @@
 Open ulauncher preferences window -> extensions -> add extension and paste the following url:
 
 ```
-https://github.com/andresatierd/ulauncher-firefox-profiles
+https://github.com/andresatierf/ulauncher-firefox-profiles
 ```
 
 ## Authors
