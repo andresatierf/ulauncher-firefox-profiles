@@ -15,14 +15,6 @@ Open ulauncher preferences window -> extensions -> add extension and paste the f
 https://github.com/andresatierd/ulauncher-firefox-profiles
 ```
 
-## Contributing
-
-- Fork it!
-- Create your feature branch: git checkout -b feature/my-feature
-- Commit your changes: git commit -am 'Add some feature'
-- Push to the branch: git push origin my-new-feature
-- Submit a pull request :D
-
 ## Authors
 
 - Original author [Alessandro Racheli](https://github.com/floydjohn)
